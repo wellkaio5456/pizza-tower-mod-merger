@@ -1,0 +1,17 @@
+{
+  "name": "example_mod",
+  "version": "1.0.0",
+  "author": "YourName",
+  "description": "Example mod for Sugary Spire Exhibition Night demo",
+  "enabled": true,
+  "files": [
+    {
+      "source": "assets/example.png",
+      "dest": "datafiles/example.png"
+    },
+    {
+      "source": "scripts/intro_patch.gml",
+      "dest": "scripts/intro_patch.gml"
+    }
+  ]
+}
