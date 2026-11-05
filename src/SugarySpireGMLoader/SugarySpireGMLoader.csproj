@@ -1,14 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>SugarySpireGMLoader</AssemblyName>
     <RootNamespace>SugarySpireGMLoader</RootNamespace>
+    <UndertaleModToolRoot Condition="'$(UndertaleModToolRoot)' == ''">$(UMT_ROOT)</UndertaleModToolRoot>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  <!--
+    UndertaleModLib is built from the official UndertaleModTool source tree.
+    Set UndertaleModToolRoot (or UMT_ROOT) to a clone made with --recurse-submodules.
+  -->
+  <ItemGroup Condition="Exists('$(UndertaleModToolRoot)/UndertaleModLib/UndertaleModLib.csproj')">
+    <ProjectReference Include="$(UndertaleModToolRoot)/UndertaleModLib/UndertaleModLib.csproj" />
   </ItemGroup>
+  <PropertyGroup Condition="Exists('$(UndertaleModToolRoot)/UndertaleModLib/UndertaleModLib.csproj')">
+    <DefineConstants>$(DefineConstants);UNDERTALEMODLIB</DefineConstants>
+  </PropertyGroup>
 </Project>
