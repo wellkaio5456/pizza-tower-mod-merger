@@ -2,6 +2,7 @@ namespace SugarySpireGMLoader.Models;
 
 public sealed class ModList
 {
+    public int SchemaVersion { get; set; } = 1;
     public List<RegisteredMod> Mods { get; set; } = new();
 }
 

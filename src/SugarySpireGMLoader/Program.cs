@@ -1,96 +1,67 @@
 using SugarySpireGMLoader.Services;
 
 var args = Environment.GetCommandLineArgs().Skip(1).ToArray();
-
-if (args.Length == 0)
-{
-    PrintHelp();
-    return 1;
-}
+if (args.Length == 0) { PrintHelp(); return 1; }
 
 try
 {
     var command = args[0].ToLowerInvariant();
-
+    var directory = args.Length > 1 ? args[1] : ".";
     switch (command)
     {
         case "detect":
-            var detectDir = args.Length > 1 ? args[1] : ".";
-            var profile = StartupChecks.ValidateGameFolder(detectDir);
-            Console.WriteLine($"Detected: {profile.Name}");
-            Console.WriteLine($"Executable: {profile.ExecutableName}");
-            Console.WriteLine($"Game data: {profile.DataFileName}");
+        {
+            var profile = StartupChecks.ValidateGameFolder(directory);
+            Console.WriteLine($"Detected: {profile.Name}\nExecutable: {profile.ExecutableName}\nData: {profile.DataFileName}");
             return 0;
-
+        }
         case "backup":
-            var backupDir = args.Length > 1 ? args[1] : ".";
-            var backupProfile = StartupChecks.ValidateGameFolder(backupDir);
-            BackupManager.CreateBackup(backupDir, backupProfile.DataFileName, backupProfile.BackupFileName);
+        {
+            var profile = StartupChecks.ValidateGameFolder(directory);
+            BackupManager.CreateBackup(directory, profile.DataFileName, profile.BackupFileName);
             return 0;
-
+        }
         case "install":
-            var installDir = args.Length > 1 ? args[1] : ".";
-            var modDir = args.Length > 2 ? args[2] : Path.Combine(installDir, "mods", "example_mod");
-            StartupChecks.ValidateGameFolder(installDir);
-            ModInstaller.Install(installDir, modDir);
+            if (args.Length < 3) throw new ArgumentException("install requires <game-folder> <mod-folder>.");
+            StartupChecks.ValidateGameFolder(directory);
+            ModInstaller.Install(directory, args[2]);
             return 0;
-
         case "listmods":
-            var listDir = args.Length > 1 ? args[1] : ".";
-            var mods = ModRegistryService.LoadInstalledMods(listDir);
-            foreach (var mod in mods.Mods)
-            {
+        {
+            var list = ModRegistryService.LoadInstalledMods(directory);
+            foreach (var mod in list.Mods.OrderBy(m => m.Name, StringComparer.OrdinalIgnoreCase))
                 Console.WriteLine($"{mod.Name} [{(mod.Enabled ? "enabled" : "disabled")}] v{mod.Version}");
-            }
             return 0;
-
+        }
         case "enablemod":
-            var enableDir = args.Length > 1 ? args[1] : ".";
-            var enableModName = args.Length > 2 ? args[2] : string.Empty;
-            ModRegistryService.SetModEnabled(enableDir, enableModName, true);
-            return 0;
-
         case "disablemod":
-            var disableDir = args.Length > 1 ? args[1] : ".";
-            var disableModName = args.Length > 2 ? args[2] : string.Empty;
-            ModRegistryService.SetModEnabled(disableDir, disableModName, false);
+            if (args.Length < 3) throw new ArgumentException($"{command} requires <game-folder> <mod-name>.");
+            ModRegistryService.SetModEnabled(directory, args[2], command == "enablemod");
             return 0;
-
         case "rebuild":
-            var rebuildDir = args.Length > 1 ? args[1] : ".";
-            var rebuildProfile = StartupChecks.ValidateGameFolder(rebuildDir);
-            BackupManager.CreateBackup(rebuildDir, rebuildProfile.DataFileName, rebuildProfile.BackupFileName);
-            GameDataBuilder.RebuildDataFile(rebuildDir, rebuildProfile.DataFileName);
+        {
+            var profile = StartupChecks.ValidateGameFolder(directory);
+            BackupManager.CreateBackup(directory, profile.DataFileName, profile.BackupFileName);
+            GameDataBuilder.RebuildDataFile(directory, profile.DataFileName);
             return 0;
-
+        }
         case "launch":
-            var launchDir = args.Length > 1 ? args[1] : ".";
-            var launchProfile = StartupChecks.ValidateGameFolder(launchDir);
-            Launcher.LaunchExecutable(launchDir, launchProfile.ExecutableName);
+        {
+            var profile = StartupChecks.ValidateGameFolder(directory);
+            Launcher.LaunchExecutable(directory, profile.ExecutableName);
             return 0;
-
-        default:
-            PrintHelp();
-            return 1;
+        }
+        default: PrintHelp(); return 1;
     }
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"Error: {ex.Message}");
+    Console.Error.WriteLine($"Error: {ex.Message}");
     return 1;
 }
 
 static void PrintHelp()
 {
-    Console.WriteLine("Sugary Spire GMLoader");
-    Console.WriteLine("");
-    Console.WriteLine("Usage:");
-    Console.WriteLine("  dotnet run -- detect <game-folder>");
-    Console.WriteLine("  dotnet run -- backup <game-folder>");
-    Console.WriteLine("  dotnet run -- install <game-folder> <mod-folder>");
-    Console.WriteLine("  dotnet run -- listmods <game-folder>");
-    Console.WriteLine("  dotnet run -- enablemod <game-folder> <mod-name>");
-    Console.WriteLine("  dotnet run -- disablemod <game-folder> <mod-name>");
-    Console.WriteLine("  dotnet run -- rebuild <game-folder>");
-    Console.WriteLine("  dotnet run -- launch <game-folder>");
+    Console.WriteLine("Sugary Spire GMLoader + Mod Merger");
+    Console.WriteLine("  detect <game-folder>\n  backup <game-folder>\n  install <game-folder> <mod-folder>\n  listmods <game-folder>\n  enablemod <game-folder> <mod-name>\n  disablemod <game-folder> <mod-name>\n  rebuild <game-folder>\n  launch <game-folder>");
 }

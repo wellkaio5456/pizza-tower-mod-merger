@@ -1,17 +1,18 @@
 {
-  "name": "example_mod",
+  "name": "sample-text-mod",
   "version": "1.0.0",
-  "author": "YourName",
-  "description": "Example mod for Sugary Spire Exhibition Night demo",
-  "enabled": true,
-  "files": [
+  "author": "Example",
+  "description": "Demonstrates deterministic STRG patch merging.",
+  "enabled": false,
+  "priority": 10,
+  "dependencies": [],
+  "conflicts": [],
+  "patches": [
     {
-      "source": "assets/example.png",
-      "dest": "datafiles/example.png"
-    },
-    {
-      "source": "scripts/intro_patch.gml",
-      "dest": "scripts/intro_patch.gml"
+      "type": "replaceString",
+      "target": "Exact original string from the game",
+      "value": "Replacement string"
     }
-  ]
+  ],
+  "files": []
 }
